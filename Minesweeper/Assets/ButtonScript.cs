@@ -11,6 +11,7 @@ public class ButtonScript : MonoBehaviour, IPointerClickHandler
     public int j {get;set;}
     private bool _marked = false;
     private bool _revealed = false;
+    public bool isRevealed {get;set;}
     void Awake()
     {
         _button = GetComponent<Button>();
@@ -18,7 +19,7 @@ public class ButtonScript : MonoBehaviour, IPointerClickHandler
     void Start()
     {
         _button.onClick.AddListener(() => BoardManager.RevealField(i,j));
-        
+        isRevealed = false;
     }
 
     // Update is called once per frame
@@ -29,10 +30,10 @@ public class ButtonScript : MonoBehaviour, IPointerClickHandler
 
     public void Reveal(int i)
     {
-        if(_marked || _revealed)
+        if(_marked)
             return;
         GetComponent<Image>().sprite = _sprites[i];
-        _revealed = true;
+        isRevealed = true;
 
     }
 
