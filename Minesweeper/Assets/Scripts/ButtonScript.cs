@@ -9,8 +9,7 @@ public class ButtonScript : MonoBehaviour, IPointerClickHandler
     private Button _button;
     public int i {get;set;}
     public int j {get;set;}
-    private bool _marked = false;
-    private bool _revealed = false;
+    public bool isMarked {get;set;}
     public bool isRevealed {get;set;}
     void Awake()
     {
@@ -20,6 +19,7 @@ public class ButtonScript : MonoBehaviour, IPointerClickHandler
     {
         _button.onClick.AddListener(() => BoardManager.RevealField(i,j));
         isRevealed = false;
+        isMarked = false;
     }
 
     // Update is called once per frame
@@ -30,8 +30,8 @@ public class ButtonScript : MonoBehaviour, IPointerClickHandler
 
     public void Reveal(int i)
     {
-        if(_marked)
-            return;
+        //if(isMarked || BoardManager.PlayerLost || BoardManager.PlayerWon)
+         //   return;
         GetComponent<Image>().sprite = _sprites[i];
         isRevealed = true;
 
@@ -42,13 +42,15 @@ public class ButtonScript : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
 
-        if(eventData.button == PointerEventData.InputButton.Right && !_marked && !_revealed){
-            _marked = true;
+        if(eventData.button == PointerEventData.InputButton.Right && !isMarked && !isRevealed && !BoardManager.PlayerLost && !BoardManager.PlayerWon){
+            isMarked = true;
             GetComponent<Image>().sprite = _sprites[10]; //flaga
+            BoardManager.UpdateBombCounterTextAfterFlag(true);
         }
-        else if(eventData.button == PointerEventData.InputButton.Right && _marked && !_revealed){
-            _marked = false;
+        else if(eventData.button == PointerEventData.InputButton.Right && isMarked && !isRevealed && !BoardManager.PlayerLost && !BoardManager.PlayerWon){
+            isMarked = false;
             GetComponent<Image>().sprite = _sprites[11]; //nieznanzaczone pole
+            BoardManager.UpdateBombCounterTextAfterFlag(false);
         }
     }
 }
