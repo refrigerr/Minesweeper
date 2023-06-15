@@ -21,24 +21,11 @@ public class ButtonScript : MonoBehaviour, IPointerClickHandler
         isRevealed = false;
         isMarked = false;
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void Reveal(int i)
     {
-        //if(isMarked || BoardManager.PlayerLost || BoardManager.PlayerWon)
-         //   return;
         GetComponent<Image>().sprite = _sprites[i];
         isRevealed = true;
-
     }
-
-  
-
     public void OnPointerClick(PointerEventData eventData)
     {
 
@@ -52,5 +39,11 @@ public class ButtonScript : MonoBehaviour, IPointerClickHandler
             GetComponent<Image>().sprite = _sprites[11]; //nieznanzaczone pole
             BoardManager.UpdateBombCounterTextAfterFlag(false);
         }
+    }
+
+    public void ResetButton(){
+        isMarked = false;
+        isRevealed = false;
+        GetComponent<Image>().sprite = _sprites[11]; //nieznanzaczone pole
     }
 }

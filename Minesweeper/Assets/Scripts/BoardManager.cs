@@ -5,26 +5,61 @@ using UnityEngine.UI;
 using TMPro;
 public class BoardManager : MonoBehaviour
 {
+
+    //pola tekstowe licznika bomb oraz czasu
     [SerializeField] TMP_Text _bombCounterTextToAssign;
     private static TMP_Text _bombCounterText;
     [SerializeField] private TMP_Text _timeCounterText;
+    //
+
+    //dropdown do wyboru poziomu trudnosci
+    [SerializeField] private TMP_Dropdown _dropDown;
+
+    //obrazki wygranej i przegranej
+    [SerializeField] private GameObject _victoryToAssign;
+    [SerializeField] private GameObject _defeatToAssign;
+    private static GameObject _victory;
+    private static GameObject _defeat;
+    //
+
+    //plansza
     private static int[,] _board = new int[13, 28];
     private static ButtonScript [,] _buttons = new ButtonScript[13,28];
+    //
+
+    //poziom trudnosci
     public static int Difficulty {get;set;}
+
     [SerializeField] private GameObject _panel;
+    //prefab pola do klikniecia
     [SerializeField] private GameObject _buttonPrefab;
+
+    //czy gracz wygral czy przegral (da sie uproscic do jednej zmiennej)
     public static bool PlayerLost {get; private set;}
     public static bool PlayerWon {get; private set;}
+
+    //liczba min oraz oznaczonych flaga pol
     private static int _numberOfMines;
     private static int _numberOfFlaggedCells = 0;
+    //
+
+    //licznik czasu
     private float _timePassed = 0;
     private static bool _countTime = false;
-    private bool _firstPlay = true;
+    //
+
+    //czy to pierwsza rozgrywka i czy wystapilo pierwsze klikniecie
+    private static bool _firstClick = true;
+    //
+
     // Start is called before the first frame update
     void Start()
     {
         Difficulty = 1;
+        _victory = _victoryToAssign;
+        _defeat = _defeatToAssign;
         _bombCounterText = _bombCounterTextToAssign;
+        GenerateButtons();
         StartNewGame();
     }
 
@@ -38,14 +73,18 @@ public class BoardManager : MonoBehaviour
         }
     }
     
-    private void GenerateBoard()
+    private static void GenerateBoard(int a, int b)
     {
-        _numberOfMines = Difficulty * 8;
+        
         int minesAdded = 0;
         while(minesAdded != _numberOfMines){
             for(int i=0; i<13;i++){
-                for(int j=0; j<28;j++){
-                    if(Random.Range(0f,1f) < ((float)_numberOfMines/(13 * 28)) && _board[i,j] != 1){
+                for(int j=0; j<28;j++)
+                {
+                    if(Random.Range(0f,1f) < ((float)_numberOfMines/(13 * 28)) 
+                    && _board[i,j] != 1
+                    && (i != a || j != b))
+                    {
                         _board[i,j] = 1;
                         minesAdded ++;
                     }
@@ -58,31 +97,29 @@ public class BoardManager : MonoBehaviour
 
     public void StartNewGame()
     {
-        
+        Difficulty = _dropDown.value + 1;
+        _numberOfMines = Difficulty * 30;
         PlayerLost = false;
         PlayerWon = false;
         _countTime = false;
-        if(!_firstPlay)
-        {
-            for(int i=0; i<_buttons.GetLength(0);i++)
-            {
-                for(int j=0; j<_buttons.GetLength(1);j++)
-                {
-                    Destroy(_buttons[i,j].transform.gameObject);
-                }
-            }
-            
-        }
-        
-        _firstPlay = false;
-        
+        _firstClick = true;
+        _victory.SetActive(false);
+        _defeat.SetActive(false);
+        _timePassed = 0;
+    
         for(int i=0; i<_board.GetLength(0);i++){
             for(int j=0; j<_board.GetLength(1);j++){
                 _board[i,j] = 0;
             }
         }
-        GenerateBoard();
-        GenerateButtons();
+
+        //resetowanie pol na planszy
+        for(int i=0; i<_buttons.GetLength(0);i++){
+            for(int j=0; j<_buttons.GetLength(1);j++){
+                _buttons[i,j].ResetButton();
+            }
+        }
+        
         
         _bombCounterText.text = _numberOfMines.ToString();
         _timeCounterText.text = 0.ToString();
@@ -122,6 +159,13 @@ public class BoardManager : MonoBehaviour
     {
         if(PlayerLost || PlayerWon)
             return;
+
+        if(_firstClick){
+            GenerateBoard(i,j);
+            _firstClick = false;
+        }
+
+
         if(!_countTime)
             _countTime = true;
 
@@ -142,7 +186,7 @@ public class BoardManager : MonoBehaviour
                 RevealAllBombs();
                 PlayerLost = true;
                 _countTime = false;
-                Debug.Log("Player lost");
+                _defeat.SetActive(true);
                 return;
             }
 
@@ -171,7 +215,7 @@ public class BoardManager : MonoBehaviour
         }
         if(CheckForWinCondition())
         {
-            Debug.Log("Player Won");
+            _victory.SetActive(true);
             _countTime = false;
             PlayerWon = true;
         }
@@ -229,7 +273,6 @@ public class BoardManager : MonoBehaviour
     private static bool CheckForWinCondition()
     {
         
-        int nonBombsRevealed = 0;
         int allCells = _buttons.GetLength(0)*_buttons.GetLength(1);
 
         for(int i=0;i<_buttons.GetLength(0);i++)
@@ -240,18 +283,10 @@ public class BoardManager : MonoBehaviour
                 {
                     return false;
                 }
-
-                if(_buttons[i,j].isRevealed && _board[i,j] == 0)
-                {
-                    nonBombsRevealed++;
-                }
+            
             }
         }
-        if(allCells - _numberOfMines == nonBombsRevealed)
-        {
-            return true;
-        }
-            
-        return false;
+       
+        return true;
     }
 }
