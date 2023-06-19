@@ -6,6 +6,8 @@ using TMPro;
 public class BoardManager : MonoBehaviour
 {
 
+    //efekty dzwiekowe
+    static SoudEffects soundEffects;
     //pola tekstowe licznika bomb oraz czasu
     [SerializeField] TMP_Text _bombCounterTextToAssign;
     private static TMP_Text _bombCounterText;
@@ -55,6 +57,7 @@ public class BoardManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        soundEffects = GetComponent<SoudEffects>();
         Difficulty = 1;
         _victory = _victoryToAssign;
         _defeat = _defeatToAssign;
@@ -98,7 +101,7 @@ public class BoardManager : MonoBehaviour
     public void StartNewGame()
     {
         Difficulty = _dropDown.value + 1;
-        _numberOfMines = Difficulty * 30;
+        _numberOfMines = Difficulty * 3;
         PlayerLost = false;
         PlayerWon = false;
         _countTime = false;
@@ -184,6 +187,7 @@ public class BoardManager : MonoBehaviour
             {
                 _buttons[i, j].Reveal(9);
                 RevealAllBombs();
+                soundEffects.playDefeat();
                 PlayerLost = true;
                 _countTime = false;
                 _defeat.SetActive(true);
@@ -215,6 +219,7 @@ public class BoardManager : MonoBehaviour
         }
         if(CheckForWinCondition())
         {
+            soundEffects.playVictory();
             _victory.SetActive(true);
             _countTime = false;
             PlayerWon = true;
