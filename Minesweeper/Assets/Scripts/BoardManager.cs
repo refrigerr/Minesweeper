@@ -101,7 +101,7 @@ public class BoardManager : MonoBehaviour
     public void StartNewGame()
     {
         Difficulty = _dropDown.value + 1;
-        _numberOfMines = Difficulty * 3;
+        _numberOfMines = Difficulty * 30;
         PlayerLost = false;
         PlayerWon = false;
         _countTime = false;
